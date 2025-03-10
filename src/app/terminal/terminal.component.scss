@@ -1,0 +1,146 @@
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.terminal-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #0c0c0c;
+  color: #33ff33;
+  font-family: 'Courier New', monospace;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(51, 255, 51, 0.5);
+  border-radius: 5px;
+}
+
+.terminal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1a1a1a;
+  padding: 10px 15px;
+  border-bottom: 1px solid #33ff33;
+}
+
+.title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.controls button {
+  background-color: #333;
+  color: #33ff33;
+  border: 1px solid #33ff33;
+  border-radius: 3px;
+  padding: 5px 10px;
+  margin-left: 10px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  transition: all 0.2s;
+}
+
+.controls button:hover {
+  background-color: #33ff33;
+  color: #000;
+}
+
+.terminal-output {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #33ff33 #0c0c0c;
+}
+
+.terminal-output::-webkit-scrollbar {
+  width: 8px;
+}
+
+.terminal-output::-webkit-scrollbar-track {
+  background: #0c0c0c;
+}
+
+.terminal-output::-webkit-scrollbar-thumb {
+  background-color: #33ff33;
+  border-radius: 10px;
+}
+
+.terminal-output pre {
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+  font-family: 'Courier New', monospace;
+  line-height: 1.5;
+}
+
+.terminal-input {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: #1a1a1a;
+  border-top: 1px solid #33ff33;
+}
+
+.prompt {
+  color: #33ff33;
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+input {
+  flex: 1;
+  background-color: transparent;
+  border: none;
+  color: #33ff33;
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  outline: none;
+}
+
+/* Formatting styles */
+.room-title {
+  color: #ffff33;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.command-input {
+  color: #33ccff;
+  font-style: italic;
+}
+
+.inventory {
+  color: #ff9933;
+}
+
+.help-text {
+  color: #cc99ff;
+}
+
+.success {
+  color: #33ff99;
+  font-weight: bold;
+}
+
+.error {
+  color: #ff3333;
+}
+
+/* Animation for cursor */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+input::after {
+  content: '|';
+  animation: blink 1s infinite;
+}

@@ -1,0 +1,27 @@
+<div class="terminal-container">
+  <div class="terminal-header">
+    <div class="title">Terminal Adventure</div>
+    <div class="controls">
+      <button (click)="gameService.processCommand('restart')">Restart Game</button>
+      <button (click)="gameService.processCommand('help')">Help</button>
+    </div>
+  </div>
+  
+  <div #terminalOutput class="terminal-output">
+    <pre *ngFor="let line of output" [innerHTML]="line | lineFormat"></pre>
+  </div>
+  
+  <div class="terminal-input">
+    <span class="prompt">&gt;</span>
+    <input 
+      #commandinput
+      type="text" 
+      [(ngModel)]="command" 
+      (keydown)="onKeyDown($event)" 
+      (keyup.enter)="executeCommand()"
+      placeholder="Type your command here..."
+      autocomplete="off"
+      autofocus
+    >
+  </div>
+</div>
