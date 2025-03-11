@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { ColorScheme } from '../components/terminal/terminal.component';
 
 export interface GameState {
   currentRoom: string;
@@ -108,6 +109,8 @@ export class GameService {
     this.getLocationDescription()
   ]);
 
+  private colorSchemeSubject = new BehaviorSubject<ColorScheme>('red');
+
   constructor() { }
 
   getState(): Observable<GameState> {
@@ -116,6 +119,14 @@ export class GameService {
 
   getOutput(): Observable<string[]> {
     return this.outputSubject.asObservable();
+  }
+
+  getColorScheme(): Observable<ColorScheme> {
+    return this.colorSchemeSubject.asObservable();
+  }
+
+  changeColorScheme(scheme: ColorScheme): void {
+    this.colorSchemeSubject.next(scheme);
   }
 
   private getCurrentState(): GameState {
@@ -206,6 +217,10 @@ export class GameService {
       case 'clear':
         this.clearOutput();
         break;
+      case 'color':
+      case 'theme':
+        this.setColorTheme(target);
+        break;
       default:
         this.addOutput("I don't understand that command. Type 'help' for a list of commands.");
     }
@@ -220,10 +235,28 @@ Available commands:
 - inventory: Check your inventory
 - use [item/object]: Use an item or interact with an object
 - examine [item/object]: Look closely at an item or object
+- color [scheme]: Change terminal color scheme (green, white, blue, amber, red)
 - restart: Start a new game
 - clear: Clear the terminal output
 - help: Show this help message
     `);
+  }
+
+  private setColorTheme(colorName: string): void {
+    const validColors: ColorScheme[] = ['green', 'white', 'blue', 'amber', 'red'];
+    
+    if (!colorName) {
+      this.addOutput(`Current color scheme: ${this.colorSchemeSubject.getValue()}`);
+      this.addOutput(`Available color schemes: ${validColors.join(', ')}`);
+      return;
+    }
+    
+    if (validColors.includes(colorName as ColorScheme)) {
+      this.changeColorScheme(colorName as ColorScheme);
+      this.addOutput(`Terminal color scheme changed to ${colorName}.`);
+    } else {
+      this.addOutput(`Invalid color scheme. Available options: ${validColors.join(', ')}`);
+    }
   }
 
   private move(direction: string): void {

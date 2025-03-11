@@ -1,5 +1,7 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, Input, Output, EventEmitter } from '@angular/core';
 import { GameService } from '../../services/game.service';
+
+export type ColorScheme = 'green' | 'white' | 'blue' | 'amber' | 'red';
 
 @Component({
   selector: 'app-terminal',
@@ -9,8 +11,12 @@ import { GameService } from '../../services/game.service';
 export class TerminalComponent implements OnInit, AfterViewChecked {
   @ViewChild('terminaloutput') terminalOutput: ElementRef;
   @ViewChild('commandinput') commandInput: ElementRef;
-  
-  output: string[] = [];
+
+  @Input() public output: string[] = [];
+  @Input() public colorScheme: ColorScheme = 'green';
+
+  @Output() commandEntered: EventEmitter<any> = new EventEmitter();
+
   command: string = '';
   commandHistory: string[] = [];
   historyIndex: number = -1;
@@ -18,8 +24,15 @@ export class TerminalComponent implements OnInit, AfterViewChecked {
   constructor(public gameService: GameService) { }
 
   ngOnInit(): void {
-    this.gameService.getOutput().subscribe(output => {
-      this.output = output;
+    if (!this.output?.length) {
+      this.gameService.getOutput().subscribe(o => {
+        this.output = o;
+      });
+    }
+    
+    // Subscribe to color scheme changes
+    this.gameService.getColorScheme().subscribe(scheme => {
+      this.colorScheme = scheme;
     });
   }
 
@@ -61,7 +74,8 @@ export class TerminalComponent implements OnInit, AfterViewChecked {
       
       const commonCommands = [
         'help', 'look', 'go', 'north', 'south', 'east', 'west',
-        'take', 'inventory', 'use', 'examine', 'restart', 'clear'
+        'take', 'inventory', 'use', 'examine', 'restart', 'clear',
+        'color', 'theme'
       ];
       
       const matchingCommands = commonCommands.filter(cmd => 
@@ -75,6 +89,7 @@ export class TerminalComponent implements OnInit, AfterViewChecked {
   }
 
   executeCommand(): void {
+    this.commandEntered.emit(this.command);
     if (this.command.trim()) {
       // Add to command history
       this.commandHistory.push(this.command);

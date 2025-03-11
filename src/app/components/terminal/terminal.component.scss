@@ -4,18 +4,320 @@
   height: 100%;
 }
 
+// Base terminal styles
 .terminal-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
   background-color: #0c0c0c;
-  color: #33ff33;
   font-family: 'Courier New', monospace;
   padding: 0;
   margin: 0;
   overflow: hidden;
-  box-shadow: 0 0 20px rgba(51, 255, 51, 0.5);
   border-radius: 5px;
+  
+  // Default theme (red)
+  color: #ff3333;
+  box-shadow: 0 0 20px rgba(255, 51, 51, 0.5);
+  
+  .terminal-header {
+    border-bottom: 1px solid #ff3333;
+  }
+  
+  .controls button {
+    color: #ff3333;
+    border: 1px solid #ff3333;
+    
+    &:hover {
+      background-color: #ff3333;
+      color: #000;
+    }
+  }
+  
+  .terminal-output {
+    scrollbar-color: #ff3333 #0c0c0c;
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: #ff3333;
+    }
+  }
+  
+  .terminal-input {
+    border-top: 1px solid #ff3333;
+  }
+  
+  .prompt, input {
+    color: #ff3333;
+  }
+  
+  // Formatting styles
+  .room-title {
+    color: #ffcc33;
+  }
+  
+  .command-input {
+    color: #ff9999;
+  }
+  
+  .inventory {
+    color: #ff6633;
+  }
+  
+  .help-text {
+    color: #ff99cc;
+  }
+  
+  .success {
+    color: #ff6666;
+  }
+  
+  .error {
+    color: #ff0000;
+  }
+}
+
+// Green theme
+.terminal-container[data-theme="green"] {
+  color: #33ff33;
+  box-shadow: 0 0 20px rgba(51, 255, 51, 0.5);
+  
+  .terminal-header {
+    border-bottom: 1px solid #33ff33;
+  }
+  
+  .controls button {
+    color: #33ff33;
+    border: 1px solid #33ff33;
+    
+    &:hover {
+      background-color: #33ff33;
+      color: #000;
+    }
+  }
+  
+  .terminal-output {
+    scrollbar-color: #33ff33 #0c0c0c;
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: #33ff33;
+    }
+  }
+  
+  .terminal-input {
+    border-top: 1px solid #33ff33;
+  }
+  
+  .prompt, input {
+    color: #33ff33;
+  }
+  
+  // Formatting styles
+  .room-title {
+    color: #ffff33;
+  }
+  
+  .command-input {
+    color: #33ccff;
+  }
+  
+  .inventory {
+    color: #ff9933;
+  }
+  
+  .help-text {
+    color: #cc99ff;
+  }
+  
+  .success {
+    color: #33ff99;
+  }
+  
+  .error {
+    color: #ff3333;
+  }
+}
+
+// White theme
+.terminal-container[data-theme="white"] {
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  
+  .terminal-header {
+    border-bottom: 1px solid #ffffff;
+  }
+  
+  .controls button {
+    color: #ffffff;
+    border: 1px solid #ffffff;
+    
+    &:hover {
+      background-color: #ffffff;
+      color: #000;
+    }
+  }
+  
+  .terminal-output {
+    scrollbar-color: #ffffff #0c0c0c;
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: #ffffff;
+    }
+  }
+  
+  .terminal-input {
+    border-top: 1px solid #ffffff;
+  }
+  
+  .prompt, input {
+    color: #ffffff;
+  }
+  
+  // Formatting styles
+  .room-title {
+    color: #cccccc;
+  }
+  
+  .command-input {
+    color: #aaaaaa;
+  }
+  
+  .inventory {
+    color: #dddddd;
+  }
+  
+  .help-text {
+    color: #bbbbbb;
+  }
+  
+  .success {
+    color: #eeeeee;
+  }
+  
+  .error {
+    color: #ff5555;
+  }
+}
+
+// Blue theme
+.terminal-container[data-theme="blue"] {
+  color: #3399ff;
+  box-shadow: 0 0 20px rgba(51, 153, 255, 0.5);
+  
+  .terminal-header {
+    border-bottom: 1px solid #3399ff;
+  }
+  
+  .controls button {
+    color: #3399ff;
+    border: 1px solid #3399ff;
+    
+    &:hover {
+      background-color: #3399ff;
+      color: #000;
+    }
+  }
+  
+  .terminal-output {
+    scrollbar-color: #3399ff #0c0c0c;
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: #3399ff;
+    }
+  }
+  
+  .terminal-input {
+    border-top: 1px solid #3399ff;
+  }
+  
+  .prompt, input {
+    color: #3399ff;
+  }
+  
+  // Formatting styles
+  .room-title {
+    color: #99ccff;
+  }
+  
+  .command-input {
+    color: #66ffff;
+  }
+  
+  .inventory {
+    color: #6699ff;
+  }
+  
+  .help-text {
+    color: #9999ff;
+  }
+  
+  .success {
+    color: #00ffff;
+  }
+  
+  .error {
+    color: #ff6666;
+  }
+}
+
+// Amber theme
+.terminal-container[data-theme="amber"] {
+  color: #ffbf00;
+  box-shadow: 0 0 20px rgba(255, 191, 0, 0.5);
+  
+  .terminal-header {
+    border-bottom: 1px solid #ffbf00;
+  }
+  
+  .controls button {
+    color: #ffbf00;
+    border: 1px solid #ffbf00;
+    
+    &:hover {
+      background-color: #ffbf00;
+      color: #000;
+    }
+  }
+  
+  .terminal-output {
+    scrollbar-color: #ffbf00 #0c0c0c;
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: #ffbf00;
+    }
+  }
+  
+  .terminal-input {
+    border-top: 1px solid #ffbf00;
+  }
+  
+  .prompt, input {
+    color: #ffbf00;
+  }
+  
+  // Formatting styles
+  .room-title {
+    color: #ffd700;
+  }
+  
+  .command-input {
+    color: #ffa500;
+  }
+  
+  .inventory {
+    color: #ff8c00;
+  }
+  
+  .help-text {
+    color: #daa520;
+  }
+  
+  .success {
+    color: #ffd700;
+  }
+  
+  .error {
+    color: #ff4500;
+  }
 }
 
 .terminal-header {
@@ -24,7 +326,6 @@
   align-items: center;
   background-color: #1a1a1a;
   padding: 10px 15px;
-  border-bottom: 1px solid #33ff33;
 }
 
 .title {
@@ -36,8 +337,6 @@
 
 .controls button {
   background-color: #333;
-  color: #33ff33;
-  border: 1px solid #33ff33;
   border-radius: 3px;
   padding: 5px 10px;
   margin-left: 10px;
@@ -46,17 +345,11 @@
   transition: all 0.2s;
 }
 
-.controls button:hover {
-  background-color: #33ff33;
-  color: #000;
-}
-
 .terminal-output {
   flex: 1;
   padding: 15px;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: #33ff33 #0c0c0c;
 }
 
 .terminal-output::-webkit-scrollbar {
@@ -65,11 +358,6 @@
 
 .terminal-output::-webkit-scrollbar-track {
   background: #0c0c0c;
-}
-
-.terminal-output::-webkit-scrollbar-thumb {
-  background-color: #33ff33;
-  border-radius: 10px;
 }
 
 .terminal-output pre {
@@ -85,11 +373,9 @@
   align-items: center;
   padding: 10px 15px;
   background-color: #1a1a1a;
-  border-top: 1px solid #33ff33;
 }
 
 .prompt {
-  color: #33ff33;
   margin-right: 10px;
   font-weight: bold;
 }
@@ -98,7 +384,6 @@ input {
   flex: 1;
   background-color: transparent;
   border: none;
-  color: #33ff33;
   font-family: 'Courier New', monospace;
   font-size: 1rem;
   outline: none;
@@ -106,32 +391,13 @@ input {
 
 /* Formatting styles */
 .room-title {
-  color: #ffff33;
   font-weight: bold;
   display: block;
   margin-bottom: 5px;
 }
 
 .command-input {
-  color: #33ccff;
   font-style: italic;
-}
-
-.inventory {
-  color: #ff9933;
-}
-
-.help-text {
-  color: #cc99ff;
-}
-
-.success {
-  color: #33ff99;
-  font-weight: bold;
-}
-
-.error {
-  color: #ff3333;
 }
 
 /* Animation for cursor */
