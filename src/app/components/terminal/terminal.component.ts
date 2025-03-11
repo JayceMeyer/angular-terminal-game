@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
-import { GameService } from '../game.service';
+import { GameService } from '../../services/game.service';
 
 @Component({
   selector: 'app-terminal',
