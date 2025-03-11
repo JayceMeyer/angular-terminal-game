@@ -109,7 +109,7 @@ export class GameService {
     this.getLocationDescription()
   ]);
 
-  private colorSchemeSubject = new BehaviorSubject<ColorScheme>('red');
+  private colorSchemeSubject = new BehaviorSubject<ColorScheme>('green');
 
   constructor() { }
 

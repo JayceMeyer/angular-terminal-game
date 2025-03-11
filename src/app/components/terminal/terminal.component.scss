@@ -400,12 +400,42 @@ input {
   font-style: italic;
 }
 
-/* Animation for cursor */
+/* Typing animation styles */
+.typing-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 15px;
+  margin-left: 2px;
+  background-color: currentColor;
+  animation: blink 1s infinite;
+}
+
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
 
+/* Add a subtle typing animation for the whole terminal */
+.terminal-output pre:last-child {
+  position: relative;
+}
+
+.terminal-output pre:last-child::after {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 15px;
+  margin-left: 2px;
+  background-color: currentColor;
+  animation: blink 1s infinite;
+}
+
+/* Remove cursor from the last line when typing is not happening */
+.terminal-output.typing-done pre:last-child::after {
+  display: none;
+}
+
+/* Animation for cursor */
 input::after {
   content: '|';
   animation: blink 1s infinite;

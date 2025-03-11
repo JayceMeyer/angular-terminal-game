@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { AppComponent } from './components/app.component';
 import { TerminalComponent } from './components/terminal/terminal.component';
-import { LineFormatPipe } from './helpers/line-format.pipe';
+import { LineFormatPipe } from './pipes/line-format.pipe';
 
 @NgModule({
   declarations: [

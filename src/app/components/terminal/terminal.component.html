@@ -7,14 +7,14 @@
     </div>
   </div>
   
-  <div #terminalOutput class="terminal-output">
-    <pre *ngFor="let line of output" [innerHTML]="line | lineFormat"></pre>
+  <div #terminalOutput class="terminal-output" [class.typing-done]="!isTyping">
+    <pre *ngFor="let line of displayedOutput" [innerHTML]="line | lineFormat"></pre>
   </div>
   
   <div class="terminal-input">
     <span class="prompt">&gt;</span>
     <input 
-      #commandinput
+      #commandInput
       type="text" 
       [(ngModel)]="command" 
       (keydown)="onKeyDown($event)" 
