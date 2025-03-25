@@ -1,2 +1,16 @@
 <!DOCTYPE html>
-<app-terminal></app-terminal>
+<div class="app-container">
+  <header>
+    <nav>
+      <div class="logo">Terminal Adventure</div>
+      <ul class="nav-links">
+        <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Game</a></li>
+        <li><a routerLink="/settings" routerLinkActive="active">Settings</a></li>
+      </ul>
+    </nav>
+  </header>
+  
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+</div>

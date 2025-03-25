@@ -110,8 +110,12 @@ export class GameService {
   ]);
 
   private colorSchemeSubject = new BehaviorSubject<ColorScheme>('green');
+  private typingSpeedSubject = new BehaviorSubject<number>(20);
+  private animationsEnabledSubject = new BehaviorSubject<boolean>(true);
 
-  constructor() { }
+  constructor() { 
+    this.loadSavedSettings();
+  }
 
   getState(): Observable<GameState> {
     return this.stateSubject.asObservable();
@@ -125,8 +129,30 @@ export class GameService {
     return this.colorSchemeSubject.asObservable();
   }
 
+  getTypingSpeed(): Observable<number> {
+    return this.typingSpeedSubject.asObservable();
+  }
+
+  getAnimationsEnabled(): Observable<boolean> {
+    return this.animationsEnabledSubject.asObservable();
+  }
+
   changeColorScheme(scheme: ColorScheme): void {
     this.colorSchemeSubject.next(scheme);
+    // Save to localStorage for persistence
+    localStorage.setItem('terminalColorScheme', scheme);
+  }
+
+  setTypingSpeed(speed: number): void {
+    this.typingSpeedSubject.next(speed);
+    // Save to localStorage for persistence
+    localStorage.setItem('terminalTypingSpeed', speed.toString());
+  }
+
+  setAnimationsEnabled(enabled: boolean): void {
+    this.animationsEnabledSubject.next(enabled);
+    // Save to localStorage for persistence
+    localStorage.setItem('terminalAnimationsEnabled', enabled.toString());
   }
 
   private getCurrentState(): GameState {
@@ -164,6 +190,10 @@ export class GameService {
     const state = this.getCurrentState();
     
     if (state.gameOver) {
+      if (input.toLowerCase() === 'restart') {
+        this.restart();
+        return;
+      }
       this.addOutput('The game is over. Type "restart" to play again.');
       return;
     }
@@ -207,56 +237,30 @@ export class GameService {
       case 'interact':
         this.interact(target);
         break;
-      case 'examine':
-      case 'inspect':
-        this.examine(target);
-        break;
       case 'restart':
-        this.restartGame();
-        break;
-      case 'clear':
-        this.clearOutput();
-        break;
-      case 'color':
-      case 'theme':
-        this.setColorTheme(target);
+        this.restart();
         break;
       default:
-        this.addOutput("I don't understand that command. Type 'help' for a list of commands.");
+        this.addOutput('I don\'t understand that command. Type "help" for a list of commands.');
+    }
+
+    if (state.gameOver) {
+      if (state.hasWon) {
+        this.addOutput('Congratulations! You have completed the mission. Type "restart" to play again.');
+      } else {
+        this.addOutput('Game over. Type "restart" to try again.');
+      }
     }
   }
 
   private showHelp(): void {
-    this.addOutput(`
-Available commands:
-- look: Look around the current location
-- go [direction]: Move in a direction (north, south, east, west)
-- take [item]: Pick up an item
-- inventory: Check your inventory
-- use [item/object]: Use an item or interact with an object
-- examine [item/object]: Look closely at an item or object
-- color [scheme]: Change terminal color scheme (green, white, blue, amber, red)
-- restart: Start a new game
-- clear: Clear the terminal output
-- help: Show this help message
-    `);
-  }
-
-  private setColorTheme(colorName: string): void {
-    const validColors: ColorScheme[] = ['green', 'white', 'blue', 'amber', 'red'];
-    
-    if (!colorName) {
-      this.addOutput(`Current color scheme: ${this.colorSchemeSubject.getValue()}`);
-      this.addOutput(`Available color schemes: ${validColors.join(', ')}`);
-      return;
-    }
-    
-    if (validColors.includes(colorName as ColorScheme)) {
-      this.changeColorScheme(colorName as ColorScheme);
-      this.addOutput(`Terminal color scheme changed to ${colorName}.`);
-    } else {
-      this.addOutput(`Invalid color scheme. Available options: ${validColors.join(', ')}`);
-    }
+    this.addOutput('Available commands:');
+    this.addOutput('- look: Look around the current location');
+    this.addOutput('- go [direction]: Move in a direction (north, south, east, west)');
+    this.addOutput('- take [item]: Pick up an item');
+    this.addOutput('- inventory: Check your inventory');
+    this.addOutput('- use [item/object]: Interact with an item or object');
+    this.addOutput('- restart: Start a new game');
   }
 
   private move(direction: string): void {
@@ -265,28 +269,33 @@ Available commands:
     
     if (room.exits[direction]) {
       const newRoom = room.exits[direction];
-      const visited = { ...state.visited };
+      const visited = state.visited[newRoom] || false;
       
-      if (!visited[newRoom]) {
-        visited[newRoom] = true;
-      }
+      this.updateState({
+        currentRoom: newRoom,
+        visited: { ...state.visited, [newRoom]: true }
+      });
       
-      this.updateState({ currentRoom: newRoom, visited });
       this.addOutput(`You move ${direction}.`);
-      this.addOutput(this.getLocationDescription());
+      
+      if (!visited) {
+        this.addOutput(this.getLocationDescription());
+      } else {
+        this.addOutput(`You are back in the ${this.rooms[newRoom].name}.`);
+      }
     } else {
       this.addOutput(`You can't go ${direction} from here.`);
     }
   }
 
   private takeItem(itemName: string): void {
-    const state = this.getCurrentState();
-    const room = this.rooms[state.currentRoom];
-    
     if (!itemName) {
       this.addOutput('Take what?');
       return;
     }
+    
+    const state = this.getCurrentState();
+    const room = this.rooms[state.currentRoom];
     
     if (room.items.includes(itemName)) {
       if (room.interactions && room.interactions[itemName]) {
@@ -294,11 +303,15 @@ Available commands:
         this.updateState(state);
         this.addOutput(result);
       } else {
-        const inventory = [...state.inventory, itemName];
+        const updatedInventory = [...state.inventory, itemName];
         const updatedItems = room.items.filter(item => item !== itemName);
+        
         room.items = updatedItems;
         
-        this.updateState({ inventory });
+        this.updateState({
+          inventory: updatedInventory
+        });
+        
         this.addOutput(`You take the ${itemName}.`);
       }
     } else {
@@ -312,74 +325,35 @@ Available commands:
     if (state.inventory.length === 0) {
       this.addOutput('Your inventory is empty.');
     } else {
-      this.addOutput(`Inventory: ${state.inventory.join(', ')}`);
+      this.addOutput('Inventory:');
+      state.inventory.forEach(item => {
+        this.addOutput(`- ${item}`);
+      });
     }
   }
 
   private interact(target: string): void {
-    const state = this.getCurrentState();
-    const room = this.rooms[state.currentRoom];
-    
     if (!target) {
-      this.addOutput('Use what?');
+      this.addOutput('Interact with what?');
       return;
     }
+    
+    const state = this.getCurrentState();
+    const room = this.rooms[state.currentRoom];
     
     if (room.interactions && room.interactions[target]) {
       const result = room.interactions[target](state);
       this.updateState(state);
       this.addOutput(result);
-      
-      if (state.gameOver) {
-        if (state.hasWon) {
-          this.addOutput('Congratulations! You have completed the mission!');
-        } else {
-          this.addOutput('Game Over. Type "restart" to try again.');
-        }
-      }
-    } else {
-      this.addOutput(`You can't use ${target} here.`);
-    }
-  }
-
-  private examine(target: string): void {
-    const state = this.getCurrentState();
-    const room = this.rooms[state.currentRoom];
-    
-    if (!target) {
-      this.addOutput('Examine what?');
-      return;
-    }
-    
-    if (room.items.includes(target)) {
-      switch (target) {
-        case 'manual':
-          this.addOutput('A technical manual with detailed instructions for rebooting the mainframe system.');
-          break;
-        case 'keycard':
-          this.addOutput('A security keycard with level 5 clearance. It can unlock secure areas.');
-          break;
-        default:
-          this.addOutput(`You see nothing special about the ${target}.`);
-      }
     } else if (state.inventory.includes(target)) {
-      switch (target) {
-        case 'manual':
-          this.addOutput('A technical manual with detailed instructions for rebooting the mainframe system.');
-          break;
-        case 'keycard':
-          this.addOutput('A security keycard with level 5 clearance. It can unlock secure areas.');
-          break;
-        default:
-          this.addOutput(`You see nothing special about the ${target}.`);
-      }
+      this.addOutput(`You examine the ${target} but don't see how to use it here.`);
     } else {
       this.addOutput(`You don't see a ${target} here.`);
     }
   }
 
-  private restartGame(): void {
-    this.stateSubject.next({
+  restart(): void {
+    this.updateState({
       currentRoom: 'start',
       inventory: [],
       gameOver: false,
@@ -387,14 +361,35 @@ Available commands:
       visited: { 'start': true }
     });
     
-    this.clearOutput();
-    this.addOutput('Welcome to Terminal Adventure!');
-    this.addOutput('Type "help" for a list of commands.');
-    this.addOutput('');
-    this.addOutput(this.getLocationDescription());
+    // Reset any modified rooms
+    this.rooms['corridor'].exits = { 'south': 'start' };
+    this.rooms['start'].items = ['manual'];
+    this.rooms['server'].items = ['keycard'];
+    
+    this.outputSubject.next([
+      'Game restarted!',
+      'Welcome to Terminal Adventure!',
+      'Type "help" for a list of commands.',
+      '',
+      this.getLocationDescription()
+    ]);
   }
 
-  private clearOutput(): void {
-    this.outputSubject.next([]);
+  // Load saved settings from localStorage on app initialization
+  loadSavedSettings(): void {
+    const savedColorScheme = localStorage.getItem('terminalColorScheme');
+    if (savedColorScheme) {
+      this.colorSchemeSubject.next(savedColorScheme as ColorScheme);
+    }
+
+    const savedTypingSpeed = localStorage.getItem('terminalTypingSpeed');
+    if (savedTypingSpeed) {
+      this.typingSpeedSubject.next(parseInt(savedTypingSpeed, 10));
+    }
+
+    const savedAnimationsEnabled = localStorage.getItem('terminalAnimationsEnabled');
+    if (savedAnimationsEnabled) {
+      this.animationsEnabledSubject.next(savedAnimationsEnabled === 'true');
+    }
   }
 }

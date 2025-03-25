@@ -26,8 +26,11 @@ export class TerminalComponent implements OnInit, AfterViewChecked, OnDestroy {
   displayedOutput: string[] = [];
   isTyping: boolean = false;
   typingSpeed: number = 20; // milliseconds per character
+  animationsEnabled: boolean = true;
   outputSubscription: Subscription;
   colorSchemeSubscription: Subscription;
+  typingSpeedSubscription: Subscription;
+  animationsEnabledSubscription: Subscription;
   
   // Queue for lines waiting to be typed
   private typingQueue: string[] = [];
@@ -70,6 +73,21 @@ export class TerminalComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.colorSchemeSubscription = this.gameService.getColorScheme().subscribe(scheme => {
       this.colorScheme = scheme;
     });
+    
+    // Subscribe to typing speed changes
+    this.typingSpeedSubscription = this.gameService.getTypingSpeed().subscribe(speed => {
+      this.typingSpeed = speed;
+    });
+    
+    // Subscribe to animations enabled/disabled
+    this.animationsEnabledSubscription = this.gameService.getAnimationsEnabled().subscribe(enabled => {
+      this.animationsEnabled = enabled;
+      
+      // If animations are disabled and we're currently typing, skip the animation
+      if (!enabled && this.isTyping) {
+        this.skipTypingAnimation();
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -79,6 +97,14 @@ export class TerminalComponent implements OnInit, AfterViewChecked, OnDestroy {
     
     if (this.colorSchemeSubscription) {
       this.colorSchemeSubscription.unsubscribe();
+    }
+    
+    if (this.typingSpeedSubscription) {
+      this.typingSpeedSubscription.unsubscribe();
+    }
+    
+    if (this.animationsEnabledSubscription) {
+      this.animationsEnabledSubscription.unsubscribe();
     }
     
     if (this.currentTypingTimeout) {
@@ -130,8 +156,7 @@ export class TerminalComponent implements OnInit, AfterViewChecked, OnDestroy {
       
       const commonCommands = [
         'help', 'look', 'go', 'north', 'south', 'east', 'west',
-        'take', 'inventory', 'use', 'examine', 'restart', 'clear',
-        'color', 'theme'
+        'take', 'inventory', 'use', 'interact', 'restart'
       ];
       
       const matchingCommands = commonCommands.filter(cmd => 
@@ -178,8 +203,8 @@ export class TerminalComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.isTyping = true;
     const nextLine = this.typingQueue.shift();
     
-    // If this is a command input (starts with '>'), display it immediately
-    if (nextLine.startsWith('> ')) {
+    // If animations are disabled or this is a command input (starts with '>'), display it immediately
+    if (!this.animationsEnabled || nextLine.startsWith('> ')) {
       this.displayedOutput.push(nextLine);
       this.isTyping = false;
       this.startTypingAnimation(); // Process next line
@@ -205,13 +230,9 @@ export class TerminalComponent implements OnInit, AfterViewChecked, OnDestroy {
         charIndex++;
         this.currentTypingTimeout = setTimeout(typeNextChar, this.typingSpeed);
       } else {
-        // Line is complete
+        // Line is complete, move to the next line
         this.isTyping = false;
-        
-        // Process next line if available
-        if (this.typingQueue.length > 0) {
-          setTimeout(() => this.startTypingAnimation(), 100); // Small delay between lines
-        }
+        this.startTypingAnimation();
       }
     };
     
@@ -219,21 +240,23 @@ export class TerminalComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
   
   skipTypingAnimation(): void {
-    // Clear the current typing timeout
+    // Clear any ongoing typing animation
     if (this.currentTypingTimeout) {
       clearTimeout(this.currentTypingTimeout);
       this.currentTypingTimeout = null;
     }
     
-    // Add the current line being typed
-    if (this.isTyping && this.typingQueue.length > 0) {
+    // Add the current line being typed to the displayed output
+    if (this.isTyping && this.typingQueue.length >= 0) {
+      // Add the current line being typed
       const currentLine = this.typingQueue.shift();
-      this.displayedOutput.push(currentLine);
-    }
-    
-    // Add all remaining lines from the queue
-    while (this.typingQueue.length > 0) {
-      this.displayedOutput.push(this.typingQueue.shift());
+      if (currentLine) {
+        this.displayedOutput.push(currentLine);
+      }
+      
+      // Add all remaining lines in the queue
+      this.displayedOutput.push(...this.typingQueue);
+      this.typingQueue = [];
     }
     
     this.isTyping = false;
