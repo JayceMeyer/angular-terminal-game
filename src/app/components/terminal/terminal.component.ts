@@ -218,14 +218,15 @@ export class TerminalComponent implements OnInit, AfterViewChecked, OnDestroy {
     const typeNextChar = () => {
       if (charIndex < nextLine.length) {
         currentText += nextLine.charAt(charIndex);
-        // Update the last line of displayedOutput with the current text
-        if (this.displayedOutput.length === 0 || this.displayedOutput[this.displayedOutput.length - 1] !== currentText) {
-          if (this.displayedOutput.length > 0 && this.displayedOutput[this.displayedOutput.length - 1].startsWith(currentText.substring(0, currentText.length - 1))) {
-            this.displayedOutput[this.displayedOutput.length - 1] = currentText;
-          } else {
-            this.displayedOutput.push(currentText);
-          }
+        // Update the displayed output with the current text
+        // Instead of replacing or modifying existing lines, always add the current text as a new line
+        // and remove the previous incomplete version of this line
+        if (charIndex > 0) {
+          // Remove the previous incomplete version of this line
+          this.displayedOutput.pop();
         }
+        // Add the current version of the line
+        this.displayedOutput.push(currentText);
         
         charIndex++;
         this.currentTypingTimeout = setTimeout(typeNextChar, this.typingSpeed);
